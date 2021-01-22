@@ -36,7 +36,7 @@ ToF_rear.SetI2CAddress(85)
 # Activate front sensor
 mux.enable_channels(3)
 ToF_front = qwiic.QwiicVL53L1X(41)
-TOF_front.SensorInit()
+ToF_front.SensorInit()
 
 while True:
     try:
