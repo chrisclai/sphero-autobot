@@ -31,7 +31,7 @@ avail_addresses.remove(0x40)
 mux.enable_channels(4)
 ToF_rear = qwiic.QwiicVL53L1X(41)
 ToF_rear.SensorInit()
-ToF_rear.setI2CAddress(85)
+ToF_rear = setI2CAddress(85)
 
 # Activate front sensor
 mux.enable_channels(3)
