@@ -1,5 +1,13 @@
-import os, sys, time
+import os, sys
 import qwiic
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+import asyncio
+import time
+
+from sphero_sdk import SpheroRvrAsync
+from sphero_sdk import SpheroAsyncDal
 
 # Calibration Sequence for VL53L1X Sensors
 
@@ -56,25 +64,40 @@ print("Hex: ", [hex(x) for x in avail_addresses])
 print("Dec: ", [int(x) for x in avail_addresses])
 os.system('i2cdetect -y 1')
 
-while True:
-    try:
-        # Start Measurements
-        ToF_front.StartRanging()
-        time.sleep(0.005)
-        ToF_rear.StartRanging()
-        time.sleep(0.005)
+def frontdist():
+    ToF_front.StartRanging()
+    time.sleep(0.005)
+    fwd_distance = ToF_front.GetDistance()
+    time.sleep(0.005)
+    ToF_front.StopRanging()
+    return fwd_distance
 
-        # Take Measurements
-        fwd_distance = ToF_front.GetDistance()
-        time.sleep(0.005)
-        rear_distance = ToF_rear.GetDistance()
-        time.sleep(0.005)
+def reardist():
+    ToF_rear.StartRanging()
+    time.sleep(0.005)
+    rear_distance = ToF_rear.GetDistance()
+    time.sleep(0.005)
+    Tof_rear.StopRanging()
+    return rear_distance
 
-        # Stop Measurements
-        ToF_front.StopRanging()
-        time.sleep(0.005)
-        ToF_rear.StopRanging()
+async def main():
+    await rvr.wake()
+    await rvr.reset_yaw()
+    await asyncio.sleep(.5)
 
-        print("Forward distance(mm) = %s    Rear Distance(mm): %s" % (fwd_distance, rear_distance))
-    except Exception as e:
-        print(e)
+    while True:
+        print("Forward distance(mm) = %s    Rear Distance(mm): %s" % (frontdist(), reardist()))
+        fwd_distance = frontdist()
+        rear_distance = reardist()
+
+        if fwd_distance < 150:
+            while distance < 150:
+                await rvr.raw_motors(2,255,1,255)
+                fwd_distance = frontdist()
+            await rvr.reset_yaw()
+        else:
+            await rvr.drive_with_heading(90,0,0)
+try:
+    loop.run_until_conplete(asyncio.gather(main()))
+except KeyboardInterrupt:
+    print("Program ended by KeyboardInterrupt")
