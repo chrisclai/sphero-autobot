@@ -27,14 +27,16 @@ avail_addresses = qwiic.scan()
 # Remove Pi Servo pHat from avail_address list
 avail_addresses.remove(0x40)
 
-# Activate back sensor and change address
+# Activate back sensor
 mux.enable_channels(4)
-ToF_rear = qwiic.QwiicVL53L1X(41)
-ToF_rear.SensorInit()
 
 # Check if dec slot 85 has been taken yet, if not, run replacement
 if 0x55 not in avail_addresses:
+    ToF_rear = qwiic.QwiicVL53L1X(41)
     ToF_rear.SetI2CAddress(85)
+else:
+    ToF_rear = qwiic.QwiicVL53L1X(85)
+ToF_rear.SensorInit()
 
 # Activate front sensor
 mux.enable_channels(3)
