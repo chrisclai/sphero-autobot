@@ -30,6 +30,12 @@ avail_addresses.remove(0x40)
 # Activate back sensor
 mux.enable_channels(4)
 
+# Initial address check before 1st change
+avail_addresses = qwiic.scan()
+print("Possible VL53L1X addresses")
+print("Hex: ", [hex(x) for x in avail_addresses])
+print("Dec: ", [int(x) for x in avail_addresses])
+
 # Check if dec slot 85 has been taken yet, if not, run replacement
 if 0x55 not in avail_addresses:
     ToF_rear = qwiic.QwiicVL53L1X(41)
@@ -42,6 +48,13 @@ ToF_rear.SensorInit()
 mux.enable_channels(3)
 ToF_front = qwiic.QwiicVL53L1X(41)
 ToF_front.SensorInit()
+
+# Final check before looping
+avail_addresses = qwiic.scan()
+print("Possible VL53L1X addresses")
+print("Hex: ", [hex(x) for x in avail_addresses])
+print("Dec: ", [int(x) for x in avail_addresses])
+os.system('i2cdetect -y 1')
 
 while True:
     try:
